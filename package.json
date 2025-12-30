@@ -1,6 +1,6 @@
 {
   "name": "react-native-misaki",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "React Native bindings for Misaki English G2P using Nitro Modules with sync and async support",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -134,8 +134,14 @@
       "@commitlint/config-conventional"
     ],
     "rules": {
-      "header-max-length": [2, "always", 200],
-      "body-max-line-length": [0]
+      "header-max-length": [
+        2,
+        "always",
+        200
+      ],
+      "body-max-line-length": [
+        0
+      ]
     }
   },
   "release-it": {
@@ -144,7 +150,9 @@
       "tagName": "v${version}",
       "requireBranch": "main",
       "push": true,
-      "pushArgs": ["--follow-tags"]
+      "pushArgs": [
+        "--follow-tags"
+      ]
     },
     "npm": {
       "publish": true
