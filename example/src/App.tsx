@@ -7,22 +7,17 @@ import {
   ScrollView,
   TextInput,
 } from 'react-native';
-import { EnglishG2P } from 'react-native-misaki';
+import { EnglishG2P, type Token } from 'react-native-misaki';
 
 interface BenchmarkResult {
   initTime: number;
   phonemizeTime: number;
   phonemizeAsyncTime: number;
-  result: string;
+  phonemes: string;
+  tokens: Token[];
 }
 
-const DEFAULT_TEXT = `Import Warehouses: ICE raided at least three facilities in 2025, alarming worker rights activists who believe that President Trump’s immigration crackdown has ensnared North Jersey’s import-export industry.
-Afrikaner in Detention: A white South African who sought asylum in the United States expected a warm welcome. Instead, he has spent months locked up in Georgia alongside hundreds of other immigrants.
-Afghan Visas: After a fatal shooting, the Trump administration froze a visa program for Afghans that Republicans in Congress had championed. The G.O.P. has not objected.
-Palau Agrees to Take Migrants: The Pacific nation has signed a “memo of understanding” with the Trump administration to take up to 75 “third country nationals” who cannot be returned to their home nations. In return, Palau will receive $7.5 million and other aid.
-Man Shot in ICE Confrontation: A U.S. Immigration and Customs Enforcement officer shot an undocumented driver trying to evade arrest in Maryland, according to ICE and local officials, resulting in a crash that left the driver and a passenger hospitalized.
-Related Content
-`;
+const DEFAULT_TEXT = `Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean. A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth. Even the all-powerful Pointing has no control about the blind texts it is an almost unorthographic life One day however a small line of blind text by the name of Lorem Ipsum decided to leave for the far World of Grammar.`;
 export default function App() {
   const [text, setText] = useState(DEFAULT_TEXT);
   const [iterations, setIterations] = useState('1');
@@ -49,7 +44,7 @@ export default function App() {
       const initTime = initEnd - initStart;
 
       // Benchmark: Synchronous phonemize
-      let syncResult = '';
+      let syncResult = { phonemes: '', tokens: [] as Token[] };
       const syncStart = performance.now();
       for (let i = 0; i < numIterations; i++) {
         syncResult = g2p.phonemize(text);
@@ -58,7 +53,7 @@ export default function App() {
       const phonemizeTime = (syncEnd - syncStart) / numIterations;
 
       // Benchmark: Async phonemize
-      let asyncResult = '';
+      let asyncResult = { phonemes: '', tokens: [] as Token[] };
       const asyncStart = performance.now();
       for (let i = 0; i < numIterations; i++) {
         asyncResult = await g2p.phonemizeAsync(text);
@@ -66,11 +61,13 @@ export default function App() {
       const asyncEnd = performance.now();
       const phonemizeAsyncTime = (asyncEnd - asyncStart) / numIterations;
 
+      const finalResult = syncResult.phonemes ? syncResult : asyncResult;
       setBenchmarkResult({
         initTime,
         phonemizeTime,
         phonemizeAsyncTime,
-        result: syncResult || asyncResult,
+        phonemes: finalResult.phonemes,
+        tokens: finalResult.tokens,
       });
     } catch (e) {
       console.error('Benchmark error:', e);
@@ -154,8 +151,17 @@ export default function App() {
             </Text>
           </View>
 
-          <Text style={styles.outputLabel}>Output:</Text>
-          <Text style={styles.outputText}>{benchmarkResult.result}</Text>
+          <Text style={styles.outputLabel}>Phonemes:</Text>
+          <Text style={styles.outputText}>{benchmarkResult.phonemes}</Text>
+
+          <Text style={styles.outputLabel}>
+            Tokens ({benchmarkResult.tokens.length}):
+          </Text>
+          <Text style={styles.tokensText}>
+            {benchmarkResult.tokens
+              .map((t) => `"${t.text}" → ${t.phonemes || '(none)'}`)
+              .join('\n')}
+          </Text>
         </View>
       )}
     </ScrollView>
@@ -286,6 +292,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#7ee787',
     lineHeight: 22,
+    fontFamily: 'Menlo',
+  },
+  tokensText: {
+    fontSize: 12,
+    color: '#8b949e',
+    lineHeight: 20,
     fontFamily: 'Menlo',
   },
 });
