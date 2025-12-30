@@ -3,9 +3,11 @@ import { NitroModules } from 'react-native-nitro-modules';
 import {
   type RNMisaki as RNMisakiNative,
   type EnglishG2POptions,
+  type Token,
+  type PhonemizeResult,
 } from './specs/RNMisaki.nitro.js';
 
-export type { EnglishG2POptions };
+export type { EnglishG2POptions, Token, PhonemizeResult };
 
 /**
  * English Grapheme-to-Phoneme converter using MisakiSwift
@@ -16,12 +18,13 @@ export type { EnglishG2POptions };
  * ```typescript
  * // American English (default)
  * const g2p = new EnglishG2P();
- * const phonemes = g2p.phonemize("Hello world!");
- * // "həlˈO wˈɜɹld!"
+ * const result = g2p.phonemize("Hello world!");
+ * console.log(result.phonemes); // "həlˈO wˈɜɹld!"
+ * console.log(result.tokens);   // [{text: "Hello", phonemes: "həlˈO", ...}, ...]
  *
  * // British English
  * const g2pBritish = new EnglishG2P({ british: true });
- * const phonemesBritish = g2pBritish.phonemize("Hello world!");
+ * const resultBritish = g2pBritish.phonemize("Hello world!");
  * ```
  */
 export class EnglishG2P {
@@ -40,18 +43,18 @@ export class EnglishG2P {
   /**
    * Convert text to phonemes synchronously
    * @param text - The English text to convert
-   * @returns IPA phoneme string
+   * @returns PhonemizeResult containing phonemes string and tokens array
    */
-  phonemize(text: string): string {
+  phonemize(text: string): PhonemizeResult {
     return this.native.phonemize(text);
   }
 
   /**
    * Convert text to phonemes asynchronously
    * @param text - The English text to convert
-   * @returns Promise resolving to IPA phoneme string
+   * @returns Promise resolving to PhonemizeResult containing phonemes string and tokens array
    */
-  phonemizeAsync(text: string): Promise<string> {
+  phonemizeAsync(text: string): Promise<PhonemizeResult> {
     return this.native.phonemizeAsync(text);
   }
 }

@@ -1,6 +1,7 @@
 import Foundation
 import NitroModules
 import MisakiSwift
+import MLXUtilsLibrary
 
 class HybridRNMisaki: HybridRNMisakiSpec {
     
@@ -48,29 +49,48 @@ class HybridRNMisaki: HybridRNMisakiSpec {
         }
     }
     
+    // MARK: - Helper Methods
+    
+    /// Convert MisakiSwift MToken array to Nitro Token array
+    private func convertTokens(_ mTokens: [MToken]) -> [Token] {
+        return mTokens.map { mToken in
+            Token(
+                text: mToken.text,
+                phonemes: mToken.phonemes,
+                whitespace: mToken.whitespace,
+                start: mToken.start_ts,
+                end: mToken.end_ts
+            )
+        }
+    }
+    
+    /// Perform phonemization and return result with tokens
+    private func performPhonemize(text: String) -> PhonemizeResult {
+        let g2pInstance = getG2P()
+        let (phonemes, mTokens) = g2pInstance.phonemize(text: text)
+        let tokens = convertTokens(mTokens)
+        return PhonemizeResult(phonemes: phonemes, tokens: tokens)
+    }
+    
     // MARK: - HybridRNMisakiSpec Implementation
     
     /// Convert text to phonemes synchronously
     /// - Parameter text: The English text to convert
-    /// - Returns: IPA phoneme string
-    func phonemize(text: String) throws -> String {
-        let g2pInstance = getG2P()
-        let (phonemes, _) = g2pInstance.phonemize(text: text)
-        return phonemes
+    /// - Returns: PhonemizeResult containing phonemes string and tokens array
+    func phonemize(text: String) throws -> PhonemizeResult {
+        return performPhonemize(text: text)
     }
     
     /// Convert text to phonemes asynchronously
     /// - Parameter text: The English text to convert
-    /// - Returns: Promise resolving to IPA phoneme string
-    func phonemizeAsync(text: String) throws -> Promise<String> {
-        return Promise.async { [weak self] () -> String in
+    /// - Returns: Promise resolving to PhonemizeResult containing phonemes string and tokens array
+    func phonemizeAsync(text: String) throws -> Promise<PhonemizeResult> {
+        return Promise.async { [weak self] () -> PhonemizeResult in
             guard let self = self else {
                 throw NSError(domain: "RNMisaki", code: 1, userInfo: [NSLocalizedDescriptionKey: "Instance deallocated"])
             }
             
-            let g2pInstance = self.getG2P()
-            let (phonemes, _) = g2pInstance.phonemize(text: text)
-            return phonemes
+            return self.performPhonemize(text: text)
         }
     }
 }
