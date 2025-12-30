@@ -1,17 +1,18 @@
 {
-  "cxxNamespace": ["misaki"],
+  "$schema": "https://nitro.margelo.com/nitro.schema.json",
+  "cxxNamespace": ["rnmisaki"],
   "ios": {
-    "iosModuleName": "Misaki"
+    "iosModuleName": "RNMisaki"
   },
   "android": {
-    "androidNamespace": ["misaki"],
-    "androidCxxLibName": "misaki"
+    "androidNamespace": ["rnmisaki"],
+    "androidCxxLibName": "RNMisaki"
   },
   "autolinking": {
-    "Misaki": {
-      "swift": "Misaki",
-      "kotlin": "Misaki"
+    "RNMisaki": {
+      "swift": "HybridRNMisaki"
     }
   },
-  "ignorePaths": ["node_modules"]
+  "ignorePaths": ["node_modules"],
+  "gitAttributesGeneratedFlag": true
 }

@@ -1,4 +1,4 @@
-package com.margelo.nitro.misaki
+package com.margelo.nitro.rnmisaki
 
 import com.facebook.react.BaseReactPackage
 import com.facebook.react.bridge.NativeModule
@@ -16,7 +16,7 @@ class MisakiPackage : BaseReactPackage() {
 
     companion object {
         init {
-            System.loadLibrary("misaki")
+            System.loadLibrary("rnmisaki")
         }
     }
 }

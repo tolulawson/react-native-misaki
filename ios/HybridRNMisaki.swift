@@ -1,4 +1,4 @@
-class Misaki: HybridMisakiSpec {
+class HybridRNMisaki: HybridRNMisakiSpec {
     public func multiply(a: Double, b: Double) throws -> Double {
         return a * b
     }

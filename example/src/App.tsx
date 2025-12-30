@@ -1,12 +1,13 @@
 import { Text, View, StyleSheet } from 'react-native';
-import { multiply } from 'react-native-misaki';
+import { EnglishG2P } from 'react-native-misaki';
 
-const result = multiply(3, 7);
+const g2p = new EnglishG2P();
 
 export default function App() {
+  const { phonemes } = g2p.phonemize('Hello, world!');
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>Result: {phonemes}</Text>
     </View>
   );
 }

@@ -2,5 +2,5 @@
 #include "misakiOnLoad.hpp"
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
-  return margelo::nitro::misaki::initialize(vm);
+  return margelo::nitro::rnmisaki::initialize(vm);
 }
