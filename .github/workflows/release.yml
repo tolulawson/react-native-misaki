@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write # Required for OIDC trusted publishing
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -21,6 +22,12 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup
+
+      - name: Configure npm registry
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Build package
         run: yarn prepare
@@ -32,15 +39,12 @@ jobs:
 
       - name: Release (dry run)
         if: ${{ inputs.dry-run }}
-        run: yarn release --ci --dry-run
+        run: yarn release --ci --dry-run --no-npm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Release
         if: ${{ !inputs.dry-run }}
         run: yarn release --ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-

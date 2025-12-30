@@ -59,7 +59,9 @@
   },
   "homepage": "https://github.com/tolulawson/react-native-misaki#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public",
+    "provenance": true
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^19.8.1",
