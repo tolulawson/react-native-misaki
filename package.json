@@ -40,7 +40,7 @@
     "nitrogen": "nitrogen",
     "typecheck": "tsc",
     "test": "jest",
-    "release": "release-it --only-version",
+    "release": "release-it",
     "lint": "eslint \"**/*.{js,ts,tsx}\""
   },
   "keywords": [
@@ -132,24 +132,33 @@
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
-    ]
+    ],
+    "rules": {
+      "header-max-length": [2, "always", 200],
+      "body-max-line-length": [0]
+    }
   },
   "release-it": {
     "git": {
       "commitMessage": "chore: release ${version}",
-      "tagName": "v${version}"
+      "tagName": "v${version}",
+      "requireBranch": "main",
+      "push": true,
+      "pushArgs": ["--follow-tags"]
     },
     "npm": {
       "publish": true
     },
     "github": {
-      "release": true
+      "release": true,
+      "releaseName": "v${version}"
     },
     "plugins": {
       "@release-it/conventional-changelog": {
         "preset": {
           "name": "angular"
-        }
+        },
+        "infile": "CHANGELOG.md"
       }
     }
   },
