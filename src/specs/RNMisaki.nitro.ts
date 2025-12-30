@@ -1,88 +1,36 @@
 import { type HybridObject } from 'react-native-nitro-modules';
 
 /**
- * Penn Treebank POS tags
+ * Options for initializing the EnglishG2P phonemizer
  */
-export enum PennTag {
-  // Nouns
-  NN = 'NN',
-  NNS = 'NNS',
-  NNP = 'NNP',
-  NNPS = 'NNPS',
-
-  // Verbs
-  VB = 'VB',
-  VBD = 'VBD',
-  VBN = 'VBN',
-  VBP = 'VBP',
-  VBZ = 'VBZ',
-  VBG = 'VBG',
-
-  // Adjectives
-  JJ = 'JJ',
-  JJR = 'JJR',
-  JJS = 'JJS',
-
-  // Adverbs
-  RB = 'RB',
-  RBR = 'RBR',
-  RBS = 'RBS',
-  WRB = 'WRB',
-
-  // Pronouns
-  PRP = 'PRP',
-  PRP_DOLLAR = 'PRP$',
-  WP = 'WP',
-  WP_DOLLAR = 'WP$',
-
-  // Determiners
-  DT = 'DT',
-  WDT = 'WDT',
-
-  // Prepositions/Conjunctions
-  IN = 'IN',
-  CC = 'CC',
-
-  // Other
-  CD = 'CD',       // Cardinal number
-  UH = 'UH',       // Interjection
-  POS = 'POS',     // Possessive
-  MD = 'MD',       // Modal
-  FW = 'FW',       // Foreign word
-  XX = 'XX',       // Unknown
-}
-
-interface Underscore {
-  is_head: boolean;
-  alias: string | null;
-  stress: number | null;
-  currency: string | null;
-  num_flags: string;
-  prespace: boolean;
-  rating: number | null;
-}
-
-export interface MToken {
-  text: string;
-  tokenRange: [number, number];
-  tag: PennTag | null;
-  phonemes: string | null;
-  whitespace: string;
-  start_ts?: number;
-  end_ts?: number;
-  _: Underscore;
-}
-
-export interface PhonemizeResult {
-  phonemes: string;
-  tokens: MToken[];
+export interface EnglishG2POptions {
+  /**
+   * Use British English pronunciation (default: false for American English)
+   */
+  british?: boolean;
 }
 
 export interface RNMisaki
   extends HybridObject<{
     ios: 'swift';
   }> {
-  phonemize(text: string): PhonemizeResult;
+  /**
+   * Whether to use British English pronunciation
+   * Must be set before calling phonemize methods
+   */
+  british: boolean;
 
-  phonemizeAsync(text: string): Promise<PhonemizeResult>;
+  /**
+   * Convert text to phonemes synchronously
+   * @param text - The English text to convert
+   * @returns IPA phoneme string
+   */
+  phonemize(text: string): string;
+
+  /**
+   * Convert text to phonemes asynchronously
+   * @param text - The English text to convert
+   * @returns Promise resolving to IPA phoneme string
+   */
+  phonemizeAsync(text: string): Promise<string>;
 }

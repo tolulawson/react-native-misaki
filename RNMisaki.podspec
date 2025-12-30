@@ -22,6 +22,13 @@ Pod::Spec.new do |s|
   s.dependency 'React-jsi'
   s.dependency 'React-callinvoker'
 
+  # Add MisakiSwift SPM dependency
+  spm_dependency(s,
+    url: 'https://github.com/mlalma/MisakiSwift.git',
+    requirement: {kind: 'upToNextMajorVersion', minimumVersion: '1.0.1'},
+    products: ['MisakiSwift']
+  )
+
   load 'nitrogen/generated/ios/RNMisaki+autolinking.rb'
   add_nitrogen_files(s)
 

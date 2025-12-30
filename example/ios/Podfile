@@ -7,14 +7,11 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, min_ios_version_supported
+platform :ios, '18.0'
 prepare_react_native_project!
 
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
+# Required for SPM dependencies like MisakiSwift
+use_frameworks! :linkage => :dynamic
 
 target 'MisakiExample' do
   config = use_native_modules!
@@ -32,5 +29,85 @@ target 'MisakiExample' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+    
+    # Fix deployment target for all pods
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '18.0'
+      end
+    end
+    
+    # Also fix the Pods project itself
+    installer.pods_project.build_configurations.each do |config|
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '18.0'
+    end
+    
+    # Fix deployment target and add SPM framework embedding for main project
+    main_project_path = installer.sandbox.root.parent + 'MisakiExample.xcodeproj'
+    if File.exist?(main_project_path.to_s)
+      main_project = Xcodeproj::Project.open(main_project_path)
+      
+      main_project.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '18.0'
+      end
+      
+      main_project.targets.each do |target|
+        target.build_configurations.each do |config|
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '18.0'
+        end
+        
+        # Add script phase to embed SPM frameworks for the main app target
+        if target.name == 'MisakiExample'
+          phase_name = '[SPM] Embed MisakiSwift Frameworks'
+          
+          # Check if phase already exists
+          existing_phase = target.shell_script_build_phases.find { |p| p.name == phase_name }
+          
+          unless existing_phase
+            phase = target.new_shell_script_build_phase(phase_name)
+            phase.shell_script = <<-SCRIPT
+# Embed SPM dynamic frameworks that aren't automatically embedded
+FRAMEWORKS_DIR="${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}"
+mkdir -p "${FRAMEWORKS_DIR}"
+
+# List of SPM frameworks to embed
+SPM_FRAMEWORKS=(
+  "MisakiSwift"
+  "MLX"
+  "MLXNN"
+  "MLXRandom"
+  "Cmlx"
+  "MLXUtilsLibrary"
+)
+
+for fw in "${SPM_FRAMEWORKS[@]}"; do
+  FRAMEWORK_PATH="${BUILD_DIR}/Debug-${PLATFORM_NAME}/PackageFrameworks/${fw}.framework"
+  if [ -d "${FRAMEWORK_PATH}" ]; then
+    echo "Embedding ${fw}.framework"
+    cp -R "${FRAMEWORK_PATH}" "${FRAMEWORKS_DIR}/"
+    
+    # Sign the framework
+    if [ -n "${EXPANDED_CODE_SIGN_IDENTITY}" ]; then
+      codesign --force --sign "${EXPANDED_CODE_SIGN_IDENTITY}" --preserve-metadata=identifier,entitlements "${FRAMEWORKS_DIR}/${fw}.framework"
+    fi
+  else
+    echo "Warning: ${fw}.framework not found at ${FRAMEWORK_PATH}"
+  fi
+done
+SCRIPT
+            phase.input_paths = []
+            phase.output_paths = []
+            
+            # Move the phase to run after "Embed Pods Frameworks"
+            embed_pods_phase = target.shell_script_build_phases.find { |p| p.name&.include?('Embed Pods Frameworks') }
+            if embed_pods_phase
+              target.build_phases.move(phase, target.build_phases.index(embed_pods_phase) + 1)
+            end
+          end
+        end
+      end
+      
+      main_project.save
+    end
   end
 end
