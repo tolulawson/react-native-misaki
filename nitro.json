@@ -1,0 +1,17 @@
+{
+  "cxxNamespace": ["misaki"],
+  "ios": {
+    "iosModuleName": "Misaki"
+  },
+  "android": {
+    "androidNamespace": ["misaki"],
+    "androidCxxLibName": "misaki"
+  },
+  "autolinking": {
+    "Misaki": {
+      "swift": "Misaki",
+      "kotlin": "Misaki"
+    }
+  },
+  "ignorePaths": ["node_modules"]
+}
