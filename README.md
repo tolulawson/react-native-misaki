@@ -4,12 +4,12 @@ React Native bindings for [MisakiSwift](https://github.com/mlalma/MisakiSwift), 
 
 ## Requirements
 
-| Requirement | Details |
-| ----------- | ------- |
-| **Platform** | iOS only (physical device required) |
-| **iOS Version** | 18.0+ |
-| **React Native** | 0.75+ |
-| **Frameworks** | Dynamic frameworks enabled |
+| Requirement      | Details                             |
+| ---------------- | ----------------------------------- |
+| **Platform**     | iOS only (physical device required) |
+| **iOS Version**  | 18.0+                               |
+| **React Native** | 0.75+                               |
+| **Frameworks**   | Dynamic frameworks enabled          |
 
 > ⚠️ **Simulator not supported**: This library uses MLX under the hood, which does not run on iOS Simulator. You must test on a physical device.
 
@@ -96,15 +96,24 @@ import { EnglishG2P } from 'react-native-misaki';
 
 // American English (default)
 const g2p = new EnglishG2P();
-const phonemes = g2p.phonemize('Hello world!');
+const result = g2p.phonemize('Hello world!');
+
+console.log(result.phonemes);
 // Output: "həlˈO wˈɜɹld!"
+
+console.log(result.tokens);
+// Output: [
+//   { text: "Hello", phonemes: "həlˈO", whitespace: " ", start: undefined, end: undefined },
+//   { text: "world", phonemes: "wˈɜɹld", whitespace: "", start: undefined, end: undefined },
+//   { text: "!", phonemes: "!", whitespace: "", start: undefined, end: undefined }
+// ]
 
 // British English
 const g2pBritish = new EnglishG2P({ british: true });
-const phonemesBritish = g2pBritish.phonemize('Hello world!');
+const resultBritish = g2pBritish.phonemize('Hello world!');
 
 // Async version (runs on background thread)
-const phonemesAsync = await g2p.phonemizeAsync('Hello world!');
+const resultAsync = await g2p.phonemizeAsync('Hello world!');
 ```
 
 ## API
@@ -123,18 +132,39 @@ new EnglishG2P(options?: EnglishG2POptions)
 
 #### Methods
 
-| Method                         | Returns           | Description                                 |
-| ------------------------------ | ----------------- | ------------------------------------------- |
-| `phonemize(text: string)`      | `string`          | Convert text to IPA phonemes synchronously  |
-| `phonemizeAsync(text: string)` | `Promise<string>` | Convert text to IPA phonemes asynchronously |
+| Method                         | Returns                    | Description                                 |
+| ------------------------------ | -------------------------- | ------------------------------------------- |
+| `phonemize(text: string)`      | `PhonemizeResult`          | Convert text to IPA phonemes synchronously  |
+| `phonemizeAsync(text: string)` | `Promise<PhonemizeResult>` | Convert text to IPA phonemes asynchronously |
+
+### `PhonemizeResult`
+
+The result object returned by `phonemize()` and `phonemizeAsync()`:
+
+| Property   | Type      | Description                                      |
+| ---------- | --------- | ------------------------------------------------ |
+| `phonemes` | `string`  | The complete IPA phoneme string for the input    |
+| `tokens`   | `Token[]` | Array of tokens with individual phoneme mappings |
+
+### `Token`
+
+Each token represents a word or punctuation from the input text:
+
+| Property     | Type                  | Description                                      |
+| ------------ | --------------------- | ------------------------------------------------ |
+| `text`       | `string`              | The original text of the token                   |
+| `phonemes`   | `string \| undefined` | The IPA phonemes for this token                  |
+| `whitespace` | `string`              | Whitespace following this token in original text |
+| `start`      | `number \| undefined` | Start timestamp for audio alignment (seconds)    |
+| `end`        | `number \| undefined` | End timestamp for audio alignment (seconds)      |
 
 ## Limitations
 
-| Constraint | Reason |
-| ---------- | ------ |
-| **iOS 18.0+ only** | MisakiSwift requires iOS 18 APIs |
-| **Physical device only** | MLX framework does not run on iOS Simulator |
-| **No Android support** | MisakiSwift is a Swift-only library with no Android equivalent |
+| Constraint               | Reason                                                         |
+| ------------------------ | -------------------------------------------------------------- |
+| **iOS 18.0+ only**       | MisakiSwift requires iOS 18 APIs                               |
+| **Physical device only** | MLX framework does not run on iOS Simulator                    |
+| **No Android support**   | MisakiSwift is a Swift-only library with no Android equivalent |
 
 ## Troubleshooting
 
