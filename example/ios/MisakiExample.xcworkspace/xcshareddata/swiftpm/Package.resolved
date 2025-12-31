@@ -1,13 +1,13 @@
 {
-  "originHash" : "39442cd9809c645416f7e5a7df8878ddc2ddf6e87d7bbe52f3a3da774325d179",
+  "originHash" : "895a8ac70641667275e6068db6b3acf73b0a9bffc69d4c2d93f1689bb8daaa4b",
   "pins" : [
     {
       "identity" : "misakiswift",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/mlalma/MisakiSwift.git",
+      "location" : "https://github.com/tolulawson/MisakiSwift.git",
       "state" : {
-        "revision" : "bb5e3e3671ef550dc545a98f4a4c15f58ee649ec",
-        "version" : "1.0.5"
+        "branch" : "static-library",
+        "revision" : "c482ff2a3a47b8d49e891b14dc9c1bdaea7bc3a6"
       }
     },
     {

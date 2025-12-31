@@ -9,9 +9,10 @@ React Native bindings for [MisakiSwift](https://github.com/mlalma/MisakiSwift), 
 | **Platform**     | iOS only (physical device required) |
 | **iOS Version**  | 18.0+                               |
 | **React Native** | 0.75+                               |
-| **Frameworks**   | Dynamic frameworks enabled          |
 
-> ⚠️ **Simulator not supported**: This library uses MLX under the hood, which does not run on iOS Simulator. You must test on a physical device.
+> **Note**: This library uses a [static fork of MisakiSwift](https://github.com/tolulawson/MisakiSwift) which eliminates the need for `use_frameworks! :linkage => :dynamic` in your Podfile.
+
+> **Simulator not supported**: This library uses MLX under the hood, which does not run on iOS Simulator. You must test on a physical device.
 
 ## Installation
 
@@ -31,19 +32,13 @@ In your `ios/Podfile`, add or update:
 platform :ios, '18.0'
 ```
 
-**2. Enable dynamic frameworks**
-
-Required for Swift Package Manager dependencies:
-
-```ruby
-use_frameworks! :linkage => :dynamic
-```
-
-**3. Install pods**
+**2. Install pods**
 
 ```sh
 cd ios && pod install
 ```
+
+That's it! No special framework configuration is required.
 
 ### Expo Setup
 
@@ -57,7 +52,7 @@ npx expo install react-native-misaki react-native-nitro-modules expo-build-prope
 
 **2. Configure `app.json`**
 
-Add the config plugin to set iOS 18.0 deployment target and enable dynamic frameworks:
+Add the config plugin to set iOS 18.0 deployment target:
 
 ```json
 {
@@ -67,8 +62,7 @@ Add the config plugin to set iOS 18.0 deployment target and enable dynamic frame
         "expo-build-properties",
         {
           "ios": {
-            "deploymentTarget": "18.0",
-            "useFrameworks": "dynamic"
+            "deploymentTarget": "18.0"
           }
         }
       ]
@@ -87,7 +81,7 @@ npx expo prebuild --platform ios --clean
 npx expo run:ios --device
 ```
 
-> ⚠️ You must use `--device` to run on a physical device. The iOS Simulator is not supported due to MLX limitations.
+> You must use `--device` to run on a physical device. The iOS Simulator is not supported due to MLX limitations.
 
 ## Usage
 
@@ -196,8 +190,7 @@ Ensure `expo-build-properties` is configured in your `app.json`:
         "expo-build-properties",
         {
           "ios": {
-            "deploymentTarget": "18.0",
-            "useFrameworks": "dynamic"
+            "deploymentTarget": "18.0"
           }
         }
       ]
