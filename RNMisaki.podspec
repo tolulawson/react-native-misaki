@@ -19,15 +19,19 @@ Pod::Spec.new do |s|
     "cpp/**/*.{hpp,cpp}",
   ]
 
-  s.dependency 'React-jsi'
-  s.dependency 'React-callinvoker'
-
-  # Add MisakiSwift SPM dependency
+  # Use the forked MisakiSwift with static library support
+  # This eliminates the need for use_frameworks! :linkage => :dynamic
   spm_dependency(s,
-    url: 'https://github.com/mlalma/MisakiSwift.git',
-    requirement: {kind: 'upToNextMajorVersion', minimumVersion: '1.0.1'},
+    url: 'https://github.com/tolulawson/MisakiSwift.git',
+    requirement: {kind: 'branch', branch: 'static-library'},
     products: ['MisakiSwift']
   )
+
+  # Required system frameworks for MLX
+  s.frameworks = ['Metal', 'Accelerate', 'Foundation', 'NaturalLanguage']
+
+  s.dependency 'React-jsi'
+  s.dependency 'React-callinvoker'
 
   load 'nitrogen/generated/ios/RNMisaki+autolinking.rb'
   add_nitrogen_files(s)
