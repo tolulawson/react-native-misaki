@@ -1,6 +1,6 @@
 # react-native-misaki
 
-React Native bindings for [MisakiSwift](https://github.com/mlalma/MisakiSwift), a Swift G2P (grapheme-to-phoneme) library for converting English text to IPA phonemes. Perfect for text-to-speech applications like [Kokoro TTS](https://github.com/hexgrad/kokoro).
+React Native bindings for [MisakiSwift](https://github.com/mlalma/MisakiSwift), a Swift G2P (grapheme-to-phoneme) library for converting English text to IPA phonemes. Designed for text-to-speech applications such as [Kokoro TTS](https://github.com/hexgrad/kokoro).
 
 ## Requirements
 
@@ -10,9 +10,9 @@ React Native bindings for [MisakiSwift](https://github.com/mlalma/MisakiSwift), 
 | **iOS Version**  | 18.0+                               |
 | **React Native** | 0.75+                               |
 
-> **Note**: This library uses a [static fork of MisakiSwift](https://github.com/tolulawson/MisakiSwift) which eliminates the need for `use_frameworks! :linkage => :dynamic` in your Podfile.
+> **Note:** This library uses a [static fork of MisakiSwift](https://github.com/tolulawson/MisakiSwift) which eliminates the need for `use_frameworks! :linkage => :dynamic` in your Podfile.
 
-> **Simulator not supported**: This library uses MLX under the hood, which does not run on iOS Simulator. You must test on a physical device.
+> **Simulator Limitation:** This library uses MLX under the hood, which does not run on iOS Simulator. Testing requires a physical device.
 
 ## Installation
 
@@ -20,7 +20,7 @@ React Native bindings for [MisakiSwift](https://github.com/mlalma/MisakiSwift), 
 npm install react-native-misaki react-native-nitro-modules
 ```
 
-> `react-native-nitro-modules` is required as this library uses [Nitro Modules](https://nitro.margelo.com/) for zero-overhead native bindings.
+`react-native-nitro-modules` is required as this library uses [Nitro Modules](https://nitro.margelo.com/) for native bindings.
 
 ### iOS Setup
 
@@ -38,11 +38,11 @@ platform :ios, '18.0'
 cd ios && pod install
 ```
 
-That's it! No special framework configuration is required.
+No additional framework configuration is required.
 
 ### Expo Setup
 
-This library requires a [development build](https://docs.expo.dev/develop/development-builds/introduction/) — it does not work with Expo Go.
+This library requires a [development build](https://docs.expo.dev/develop/development-builds/introduction/) and is not compatible with Expo Go.
 
 **1. Install dependencies**
 
@@ -81,7 +81,7 @@ npx expo prebuild --platform ios --clean
 npx expo run:ios --device
 ```
 
-> You must use `--device` to run on a physical device. The iOS Simulator is not supported due to MLX limitations.
+The `--device` flag is required as the iOS Simulator is not supported due to MLX limitations.
 
 ## Usage
 
@@ -164,7 +164,7 @@ Each token represents a word or punctuation from the input text:
 
 ### App crashes on simulator
 
-This library does not support the iOS Simulator. MLX, which powers MisakiSwift, requires Apple Silicon and does not run in the simulated environment. You must use a physical iOS device.
+This library does not support the iOS Simulator. MLX, which powers MisakiSwift, requires Apple Silicon and does not run in the simulated environment. A physical iOS device is required for testing.
 
 ### Build fails with deployment target error
 
@@ -205,7 +205,7 @@ Then regenerate the native project:
 npx expo prebuild --platform ios --clean
 ```
 
-### "Expo Go" is not supported
+### Expo Go is not supported
 
 This library includes native code and requires a development build. Expo Go cannot load native modules. Use:
 
@@ -225,7 +225,7 @@ npx react-native run-ios -- CODE_SIGNING_ALLOWED=NO
 npx expo run:ios --device -- CODE_SIGNING_ALLOWED=NO
 ```
 
-See [IMPLEMENTATION.md](./IMPLEMENTATION.md) for more details.
+See [IMPLEMENTATION.md](./IMPLEMENTATION.md) for additional details.
 
 ## Contributing
 
