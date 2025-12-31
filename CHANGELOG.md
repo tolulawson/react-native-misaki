@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/tolulawson/react-native-misaki/compare/v0.3.0...v0.3.1) (2025-12-31)
+
+
+### Bug Fixes
+
+* ensure npm publish uses correct version with OIDC provenance ([4622dbd](https://github.com/tolulawson/react-native-misaki/commit/4622dbdd922de94012567f72b0cd3c5faedac0bd))
+
 # [0.3.0](https://github.com/tolulawson/react-native-misaki/compare/v0.2.0...v0.3.0) (2025-12-31)
 
 
