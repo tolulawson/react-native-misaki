@@ -50,6 +50,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
+      - name: Pull latest changes after release
+        if: ${{ !inputs.dry-run }}
+        run: git pull --rebase
+
+      - name: Rebuild package with new version
+        if: ${{ !inputs.dry-run }}
+        run: yarn prepare
+
       - name: Publish to npm with provenance
         if: ${{ !inputs.dry-run }}
-        run: npm publish
+        run: npm publish --provenance --access public
