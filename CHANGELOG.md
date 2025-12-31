@@ -1,3 +1,21 @@
+# [0.4.0](https://github.com/tolulawson/react-native-misaki/compare/v0.2.0...v0.4.0) (2025-12-31)
+
+
+### Bug Fixes
+
+* ensure npm publish uses correct version with OIDC provenance ([4622dbd](https://github.com/tolulawson/react-native-misaki/commit/4622dbdd922de94012567f72b0cd3c5faedac0bd))
+* install npm 11+ for OIDC trusted publishing ([ab8c073](https://github.com/tolulawson/react-native-misaki/commit/ab8c073dad68478281cd4588d7c1194a5063f440))
+* make release atomic with rollback on npm publish failure ([2318c57](https://github.com/tolulawson/react-native-misaki/commit/2318c575391809ce21b79ce0685ed206ef47a3cc))
+* reorder release workflow to publish npm before GitHub release ([676b023](https://github.com/tolulawson/react-native-misaki/commit/676b02379c2d80b19238760a954715d85a59fbab))
+* use npm version and conventional-changelog for version bump ([57592ca](https://github.com/tolulawson/react-native-misaki/commit/57592cace89892dfd197237861e2d0338048c43b))
+
+
+### Features
+
+* update RNMisaki to version 0.2.0 with enhanced phonemization features ([987cd29](https://github.com/tolulawson/react-native-misaki/commit/987cd29dbf356d524361f406719ddfd36126be3f))
+
+
+
 # Changelog
 
 ## [0.3.1](https://github.com/tolulawson/react-native-misaki/compare/v0.3.0...v0.3.1) (2025-12-31)
