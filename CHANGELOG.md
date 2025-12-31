@@ -1,3 +1,27 @@
+# [1.0.0](https://github.com/tolulawson/react-native-misaki/compare/v0.4.0...v1.0.0) (2025-12-31)
+
+
+### Features
+
+* switch to static MisakiSwift fork for simpler installation ([b4e3aa0](https://github.com/tolulawson/react-native-misaki/commit/b4e3aa0755572f2d99aa713c003b14e8f4bcffa9))
+
+
+### BREAKING CHANGES
+
+* Now uses tolulawson/MisakiSwift fork with static library support
+
+Changes:
+- Use forked MisakiSwift with static library type (no dynamic frameworks required)
+- Remove use_frameworks! :linkage => :dynamic requirement from Podfile
+- Update README with simplified installation instructions
+- Update example app to use static linking
+
+This eliminates the need for consuming apps to add use_frameworks! :linkage => :dynamic
+to their Podfile, making installation much simpler and avoiding potential conflicts with
+other pods that don't support dynamic frameworks.
+
+
+
 # [0.4.0](https://github.com/tolulawson/react-native-misaki/compare/v0.2.0...v0.4.0) (2025-12-31)
 
 
