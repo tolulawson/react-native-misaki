@@ -48,7 +48,7 @@ jobs:
 
       - name: Release (dry run)
         if: ${{ inputs.dry-run }}
-        run: yarn release --ci --dry-run --no-npm
+        run: yarn release --ci --dry-run
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
@@ -56,21 +56,35 @@ jobs:
       # then create the GitHub release only after npm succeeds.
       # This prevents orphaned GitHub releases if npm publish fails.
 
-      - name: Bump version and update changelog (no git push yet)
+      - name: Determine version bump type
+        if: ${{ !inputs.dry-run }}
+        id: bump-type
+        run: |
+          # Use conventional-recommended-bump to determine bump type based on commits
+          BUMP_TYPE=$(npx conventional-recommended-bump -p angular)
+          echo "type=${BUMP_TYPE}" >> $GITHUB_OUTPUT
+          echo "Recommended bump type: ${BUMP_TYPE}"
+
+      - name: Bump version
         if: ${{ !inputs.dry-run }}
         id: version-bump
         run: |
-          # Run release-it with no git push, no GitHub release, no npm
-          # This only bumps version and updates changelog locally
-          yarn release --ci --no-npm --no-git.push --no-git.tag --no-github
+          BUMP_TYPE="${{ steps.bump-type.outputs.type }}"
+
+          # Bump version without creating git tag (we'll do that after npm publish)
+          npm version "${BUMP_TYPE}" --no-git-tag-version
 
           # Get the new version
           NEW_VERSION=$(node -p "require('./package.json').version")
           echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
           echo "tag=v${NEW_VERSION}" >> $GITHUB_OUTPUT
           echo "New version: ${NEW_VERSION}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Update changelog
+        if: ${{ !inputs.dry-run }}
+        run: |
+          VERSION="${{ steps.version-bump.outputs.version }}"
+          npx conventional-changelog -p angular -i CHANGELOG.md -s -r 1
 
       - name: Rebuild package with new version
         if: ${{ !inputs.dry-run }}
@@ -102,7 +116,6 @@ jobs:
           TAG="${{ steps.version-bump.outputs.tag }}"
 
           # Extract changelog for this version
-          # Look for content between this version header and the next version header
           CHANGELOG=$(awk "/^## \\[${VERSION}\\]|^## ${VERSION}/,/^## \\[|^## [0-9]/" CHANGELOG.md | head -n -1)
 
           gh release create "${TAG}" \
