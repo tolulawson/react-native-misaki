@@ -30,6 +30,14 @@ jobs:
           node-version-file: .nvmrc
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Install npm 11+ for trusted publishing
+        run: npm install -g npm@latest
+
+      - name: Verify npm version
+        run: |
+          npm --version
+          echo "Trusted publishing requires npm 11.5.1+"
+
       - name: Build package
         run: yarn prepare
 
@@ -69,10 +77,12 @@ jobs:
         if: ${{ !inputs.dry-run }}
         run: yarn prepare
 
-      - name: Publish to npm with provenance
+      - name: Publish to npm (trusted publishing)
         id: npm-publish
         if: ${{ !inputs.dry-run }}
-        run: npm publish --provenance --access public
+        run: npm publish --access public
+        # Note: With trusted publishing (OIDC), provenance is automatic
+        # and no NODE_AUTH_TOKEN is needed
 
       - name: Rollback on npm publish failure
         if: ${{ failure() && steps.npm-publish.outcome == 'failure' && !inputs.dry-run }}
