@@ -1,6 +1,6 @@
 {
   "name": "react-native-misaki",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "React Native bindings for Misaki English G2P using Nitro Modules with sync and async support",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
