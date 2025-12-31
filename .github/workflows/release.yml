@@ -44,20 +44,65 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
+      - name: Get current version (before release)
+        if: ${{ !inputs.dry-run }}
+        id: pre-release
+        run: |
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+          echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
       - name: Release (version bump, changelog, git tag, GitHub release)
         if: ${{ !inputs.dry-run }}
         run: yarn release --ci --no-npm
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
-      - name: Pull latest changes after release
+      - name: Get new version (after release)
         if: ${{ !inputs.dry-run }}
-        run: git pull --rebase
+        id: post-release
+        run: |
+          git pull --rebase
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+          echo "tag=v$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Rebuild package with new version
         if: ${{ !inputs.dry-run }}
         run: yarn prepare
 
       - name: Publish to npm with provenance
+        id: npm-publish
         if: ${{ !inputs.dry-run }}
         run: npm publish --provenance --access public
+
+      - name: Rollback on npm publish failure
+        if: ${{ failure() && steps.npm-publish.outcome == 'failure' && !inputs.dry-run }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          echo "::error::npm publish failed, rolling back release..."
+
+          NEW_VERSION="${{ steps.post-release.outputs.version }}"
+          NEW_TAG="${{ steps.post-release.outputs.tag }}"
+          PRE_COMMIT="${{ steps.pre-release.outputs.commit }}"
+
+          echo "Rolling back from version ${NEW_VERSION} to commit ${PRE_COMMIT}"
+
+          # Delete the GitHub release
+          echo "Deleting GitHub release ${NEW_TAG}..."
+          gh release delete "${NEW_TAG}" --yes || echo "Failed to delete release (may not exist)"
+
+          # Delete the remote tag
+          echo "Deleting remote tag ${NEW_TAG}..."
+          git push origin --delete "${NEW_TAG}" || echo "Failed to delete remote tag"
+
+          # Delete the local tag
+          echo "Deleting local tag ${NEW_TAG}..."
+          git tag -d "${NEW_TAG}" || echo "Failed to delete local tag"
+
+          # Force push to reset main to pre-release commit
+          echo "Resetting main branch to pre-release commit..."
+          git reset --hard "${PRE_COMMIT}"
+          git push --force origin main
+
+          echo "::error::Rollback complete. The release has been reverted."
+          exit 1
