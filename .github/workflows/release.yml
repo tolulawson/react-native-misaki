@@ -43,8 +43,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Release
+      - name: Release (version bump, changelog, git tag, GitHub release)
         if: ${{ !inputs.dry-run }}
-        run: yarn release --ci
+        run: yarn release --ci --no-npm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to npm with provenance
+        if: ${{ !inputs.dry-run }}
+        run: npm publish
