@@ -52,67 +52,61 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
-      - name: Get current version (before release)
-        if: ${{ !inputs.dry-run }}
-        id: pre-release
-        run: |
-          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-          echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+      # For actual releases, we do version bump and npm publish FIRST,
+      # then create the GitHub release only after npm succeeds.
+      # This prevents orphaned GitHub releases if npm publish fails.
 
-      - name: Release (version bump, changelog, git tag, GitHub release)
+      - name: Bump version and update changelog (no git push yet)
         if: ${{ !inputs.dry-run }}
-        run: yarn release --ci --no-npm
+        id: version-bump
+        run: |
+          # Run release-it with no git push, no GitHub release, no npm
+          # This only bumps version and updates changelog locally
+          yarn release --ci --no-npm --no-git.push --no-git.tag --no-github
+
+          # Get the new version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=v${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "New version: ${NEW_VERSION}"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-
-      - name: Get new version (after release)
-        if: ${{ !inputs.dry-run }}
-        id: post-release
-        run: |
-          git pull --rebase
-          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-          echo "tag=v$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Rebuild package with new version
         if: ${{ !inputs.dry-run }}
         run: yarn prepare
 
       - name: Publish to npm (trusted publishing)
-        id: npm-publish
         if: ${{ !inputs.dry-run }}
         run: npm publish --access public
         # Note: With trusted publishing (OIDC), provenance is automatic
-        # and no NODE_AUTH_TOKEN is needed
 
-      - name: Rollback on npm publish failure
-        if: ${{ failure() && steps.npm-publish.outcome == 'failure' && !inputs.dry-run }}
+      # Only after npm publish succeeds, commit, tag, push, and create GitHub release
+      - name: Commit, tag, and push
+        if: ${{ !inputs.dry-run }}
+        run: |
+          VERSION="${{ steps.version-bump.outputs.version }}"
+          TAG="${{ steps.version-bump.outputs.tag }}"
+
+          git add -A
+          git commit -m "chore: release ${VERSION}"
+          git tag -a "${TAG}" -m "Release ${VERSION}"
+          git push --follow-tags
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Create GitHub release
+        if: ${{ !inputs.dry-run }}
         run: |
-          echo "::error::npm publish failed, rolling back release..."
+          VERSION="${{ steps.version-bump.outputs.version }}"
+          TAG="${{ steps.version-bump.outputs.tag }}"
 
-          NEW_VERSION="${{ steps.post-release.outputs.version }}"
-          NEW_TAG="${{ steps.post-release.outputs.tag }}"
-          PRE_COMMIT="${{ steps.pre-release.outputs.commit }}"
+          # Extract changelog for this version
+          # Look for content between this version header and the next version header
+          CHANGELOG=$(awk "/^## \\[${VERSION}\\]|^## ${VERSION}/,/^## \\[|^## [0-9]/" CHANGELOG.md | head -n -1)
 
-          echo "Rolling back from version ${NEW_VERSION} to commit ${PRE_COMMIT}"
-
-          # Delete the GitHub release
-          echo "Deleting GitHub release ${NEW_TAG}..."
-          gh release delete "${NEW_TAG}" --yes || echo "Failed to delete release (may not exist)"
-
-          # Delete the remote tag
-          echo "Deleting remote tag ${NEW_TAG}..."
-          git push origin --delete "${NEW_TAG}" || echo "Failed to delete remote tag"
-
-          # Delete the local tag
-          echo "Deleting local tag ${NEW_TAG}..."
-          git tag -d "${NEW_TAG}" || echo "Failed to delete local tag"
-
-          # Force push to reset main to pre-release commit
-          echo "Resetting main branch to pre-release commit..."
-          git reset --hard "${PRE_COMMIT}"
-          git push --force origin main
-
-          echo "::error::Rollback complete. The release has been reverted."
-          exit 1
+          gh release create "${TAG}" \
+            --title "${TAG}" \
+            --notes "${CHANGELOG:-Release ${VERSION}}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
